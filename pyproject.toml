@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cognis-elastdetect"
+version = "0.1.0"
+description = "Elastic detection-rule management CLI: validate, diff, lint, and deploy."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Cognis Digital" }]
+maintainers = [{ name = "Cognis Digital" }]
+keywords = ["elastic", "detection", "siem", "security", "rules", "ci", "kibana"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/cognis-digital/elastdetect"
+Repository = "https://github.com/cognis-digital/elastdetect"
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[project.scripts]
+elastdetect = "elastdetect.cli:main"
+
+[tool.setuptools]
+packages = ["elastdetect"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
