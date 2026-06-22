@@ -43,6 +43,21 @@ def cmd_validate(args) -> int:
     total_errors = 0
     total_warnings = 0
 
+    if getattr(args, "sarif", False):
+        # SARIF mode: emit a machine-readable log on stdout for CI ingestion.
+        # Findings are still counted so the exit code keeps gating the build.
+        from .sarif import reports_to_sarif
+
+        for rep in reports:
+            for issue in rep.issues:
+                total_errors += 1 if issue.level == "error" else 0
+                total_warnings += 1 if issue.level == "warning" else 0
+        log = reports_to_sarif(reports, include_warnings=False)
+        print(json.dumps(log, indent=2, sort_keys=True))
+        if total_errors or result.errors:
+            return EXIT_FINDINGS
+        return EXIT_OK
+
     for rep in reports:
         for issue in rep.issues:
             total_errors += 1 if issue.level == "error" else 0
@@ -161,6 +176,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_val = sub.add_parser("validate", help="validate rules (CI gate)")
     p_val.add_argument("path", help="rules directory or JSON file")
+    p_val.add_argument(
+        "--sarif",
+        action="store_true",
+        help="emit SARIF 2.1.0 to stdout (for GitHub/CI code scanning)",
+    )
     p_val.set_defaults(func=cmd_validate)
 
     p_diff = sub.add_parser("diff", help="diff two rule sets by rule_id")

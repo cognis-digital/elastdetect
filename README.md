@@ -69,6 +69,26 @@ Type-specific: `threshold` rules require a `threshold` object with a numeric
 
 **Exit codes:** `0` clean · `1` validation error(s) found · `2` could not load input.
 
+#### SARIF export for CI code scanning
+
+Add `--sarif` to emit a **SARIF 2.1.0** log on stdout instead of the text
+summary. GitHub code scanning, Azure DevOps, and most security dashboards ingest
+SARIF directly, so validation failures appear as annotations on the pull request
+rather than only as a red build log. The exit code is unchanged (`1` on errors),
+so it still gates a build. Only `error`-level findings are exported.
+
+```bash
+elastdetect validate --sarif examples/rules > elastdetect.sarif
+```
+
+```yaml
+# GitHub Actions: publish findings to the PR's "Files changed" tab
+- run: elastdetect validate --sarif rules/ > elastdetect.sarif || true
+- uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: elastdetect.sarif
+```
+
 ### Diff
 
 Structural diff of two rule sets keyed by `rule_id` — reports **added**,
@@ -120,6 +140,31 @@ elastdetect deploy examples/rules \
 ships an `old`/`new` pair demonstrating an add, a removal, and field
 modifications.
 
+### Demos (real-use-case walkthroughs)
+
+`demos/` contains ten self-contained, runnable scenarios. Each has rule data in
+the real Elastic rule JSON shape plus a `SCENARIO.md` describing where the data
+came from, the exact command, the expected output, and how to act on it. Every
+demo is exercised by the test suite (`tests/test_demos.py`).
+
+| Demo | What it shows |
+|------|---------------|
+| `01-ci-gate-clean` | Validate a clean batch — the green CI build (exit 0) |
+| `02-ci-gate-broken` | Four common authoring mistakes the gate catches (exit 1) |
+| `03-lint-authoring-hygiene` | `lint --strict` as a documentation promotion gate |
+| `04-rule-tuning-diff` | Field-level `diff` of a quarterly tuning change set |
+| `05-deploy-dry-run` | Safe offline deploy preview; invalid rules withheld |
+| `06-sarif-code-scanning` | `validate --sarif` for GitHub/CI code scanning |
+| `07-threshold-bruteforce` | A `threshold` (RDP brute-force) rule and its extra checks |
+| `08-new-terms-rare-process` | A `new_terms` "first seen RMM tool" rule |
+| `09-machine-learning-job` | ML rules require a job id, not a query |
+| `10-mixed-batch-triage` | Validate a whole rule repository (nested directory tree) |
+
+```bash
+# e.g. walk a whole rule repo, just like a detection-as-code pipeline
+elastdetect validate demos/10-mixed-batch-triage/rules
+```
+
 ---
 
 ## Development
@@ -143,8 +188,10 @@ elastdetect/
   validate.py      schema validation
   lint.py          style warnings
   diff.py          rule-set diffing
+  sarif.py         SARIF 2.1.0 export of findings
   deploy.py        Kibana deploy (ONLY networked module)
 examples/          authored rules + diff pair
+demos/             ten runnable real-use-case scenarios (each with SCENARIO.md)
 tests/             pytest suite (offline)
 ```
 
