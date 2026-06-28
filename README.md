@@ -15,6 +15,64 @@ path to push rules to a cluster.
 
 ---
 
+
+<!-- cognis:example:start -->
+## 🔎 Example output
+
+Real, reproducible output from the tool — runs offline:
+
+```console
+$ elastdetect --version
+elastdetect 0.1.0
+```
+
+```console
+$ elastdetect --help
+usage: elastdetect [-h] [--version] {validate,diff,lint,deploy} ...
+
+Elastic detection-rule management CLI (validate / diff / lint / deploy).
+
+positional arguments:
+  {validate,diff,lint,deploy}
+    validate            validate rules (CI gate)
+    diff                diff two rule sets by rule_id
+    lint                style warnings (description/tags/references)
+    deploy              deploy rules to an Elastic cluster
+
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+```
+
+> Blocks above are real `elastdetect` output — reproduce them from a clone.
+
+**Sample result format** _(illustrative values — run on your own data for real findings):_
+
+```
+$ elastdetect deploy --cluster my-cluster --rules my-rules.json
+Deploying rules to my-cluster...
+Rules deployed successfully.
+
+{
+  "rules": [
+    {
+      "rule_id": "my-rule-1",
+      "description": "This is a test rule",
+      "tags": ["test", "example"],
+      "references": ["https://www.example.com"]
+    },
+    {
+      "rule_id": "my-rule-2",
+      "description": "Another test rule",
+      "tags": ["test", "another-example"],
+      "references": ["https://www.another-example.com"]
+    }
+  ]
+}
+```
+
+<!-- cognis:example:end -->
+
 ## Why
 
 Detection rules drift. New rules get added, risk scores get retuned, queries get
